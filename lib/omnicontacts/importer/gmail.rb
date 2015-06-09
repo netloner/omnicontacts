@@ -45,8 +45,8 @@ module OmniContacts
 
       def contacts_from_response response_as_json
         response = JSON.parse(response_as_json)
-Rails.logger.debug response
-sleep 40
+Rails.logger.ap response
+
         return [] if response['feed'].nil? || response['feed']['entry'].nil?
         contacts = []
         return contacts if response.nil?
