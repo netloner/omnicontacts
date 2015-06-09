@@ -106,8 +106,8 @@ Rails.logger.ap response
               contact[:profile_picture] = image_url_from_email(contact[:email])
             end
           end
-          if contrac[:email].blank? && yahoo_id.present?
-            contrac[:email] = "#{yahoo_id}@yahoo.com.tw"
+          if contact[:email].blank? && yahoo_id.present?
+            contact[:email] = "#{yahoo_id}@yahoo.com.tw"
           end
           contacts << contact if contact[:name]
         end
