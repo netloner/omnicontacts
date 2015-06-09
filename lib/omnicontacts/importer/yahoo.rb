@@ -52,7 +52,6 @@ module OmniContacts
 
       def contacts_from_response response_as_json
         response = JSON.parse(response_as_json)
-Rails.logger.ap response
         contacts = []
         return contacts unless response['contacts']['contact']
         response['contacts']['contact'].each do |entry|
