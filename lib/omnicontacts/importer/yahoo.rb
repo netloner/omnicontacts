@@ -52,6 +52,7 @@ module OmniContacts
 
       def contacts_from_response response_as_json
         response = JSON.parse(response_as_json)
+Rails.logger.ap response
         contacts = []
         return contacts unless response['contacts']['contact']
         response['contacts']['contact'].each do |entry|
@@ -105,6 +106,9 @@ module OmniContacts
               contact[:profile_picture] = image_url_from_email(contact[:email])
             end
           end
+          if contrac[:email].blank? && yahoo_id.present?
+            contrac[:email] = "#{yahoo_id}@yahoo.com.tw"
+          end
           contacts << contact if contact[:name]
         end
         contacts.uniq! {|c| c[:email] || c[:profile_picture] || c[:name]}
@@ -112,7 +116,8 @@ module OmniContacts
       end
 
       def image_url yahoo_id
-        return 'https://img.msg.yahoo.com/avatar.php?yids=' + yahoo_id if yahoo_id
+        #return 'https://img.msg.yahoo.com/avatar.php?yids=' + yahoo_id if yahoo_id
+        return "http://img.msg.yahoo.com/v1/displayImage/yahoo/#{yahoo_id}" if yahoo_id
       end
 
       def parse_email(emails)
