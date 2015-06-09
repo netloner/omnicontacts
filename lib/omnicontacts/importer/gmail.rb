@@ -24,7 +24,7 @@ module OmniContacts
       def fetch_contacts_using_access_token access_token, token_type
         fetch_current_user(access_token, token_type)
         contacts_response = https_get(@contacts_host, @contacts_path, contacts_req_params, contacts_req_headers(access_token, token_type))
-        contacts_from_response contacts_response
+        contacts_from_response contacts_response, access_token
       end
 
       def fetch_current_user access_token, token_type
@@ -43,10 +43,8 @@ module OmniContacts
         {"GData-Version" => "3.0", "Authorization" => "#{token_type} #{token}"}
       end
 
-      def contacts_from_response response_as_json
+      def contacts_from_response response_as_json, access_token
         response = JSON.parse(response_as_json)
-Rails.logger.ap response
-
         return [] if response['feed'].nil? || response['feed']['entry'].nil?
         contacts = []
         return contacts if response.nil?
@@ -152,12 +150,18 @@ Rails.logger.ap response
           # Support older versions of the gem by keeping singular entries around
           contact[:phone_number] = contact[:phone_numbers][0][:number] if contact[:phone_numbers][0]
 
-          if entry['gContact$website'] && entry['gContact$website'][0]["rel"] == "profile"
-            contact[:id] = contact_id(entry['gContact$website'][0]["href"])
-            contact[:profile_picture] = image_url(contact[:id])
-          else
-            contact[:profile_picture] = image_url_from_email(contact[:email])
-          end
+          entry['link'].each do |link|
+            if link['type'] == 'image/*' && link['gd$etag'].present?
+              contact[:profile_picture] = "#{link['href']}?access_token=#{access_token}"
+            end
+          end if entry['link']
+
+          # if entry['gContact$website'] && entry['gContact$website'][0]["rel"] == "profile"
+          #   contact[:id] = contact_id(entry['gContact$website'][0]["href"])
+          #   contact[:profile_picture] = image_url(contact[:id])
+          # else
+          #   contact[:profile_picture] = image_url_from_email(contact[:email], access_token)
+          # end
 
           if entry['gContact$event']
             contact[:dates] = []
